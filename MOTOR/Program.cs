@@ -14,6 +14,34 @@ string[] bidSeq = new string[] {"1C", "1D", "1H", "1S", "1NT", "2C", "2D", "2H",
 
 char[] suitOrder = new char[] { 'S', 'H', 'D', 'C' };
 
+int[][] bidPos = new int[][]
+{
+    new int[] {32, 7},
+    new int[] {38, 15},
+    new int[] {20, 17},
+    new int[] {14, 9},
+    new int[] {26, 7},
+    new int[] {38, 13},
+    new int[] {26, 17},
+    new int[] {14, 11},
+    new int[] {20, 7},
+    new int[] {38, 11},
+    new int[] {32, 17},
+    new int[] {14, 13},
+    new int[] {32, 5},
+    new int[] {38, 9},
+    new int[] {20, 19},
+    new int[] {14, 15},
+    new int[] {26, 5},
+    new int[] {44, 15},
+    new int[] {26, 19},
+    new int[] {8, 9},
+    new int[] {20, 5},
+    new int[] {44, 13},
+    new int[] {32, 19},
+    new int[] {8, 11},
+};
+
 Dictionary<string, Dictionary<string, string>[]> MOTOR = new Dictionary<string, Dictionary<string, string>[]>();
 
 MOTOR.Add("relay1C", new Dictionary<string, string>[5]);
@@ -47,6 +75,139 @@ MOTOR["threeSuitMajor1C"][0] = new Dictionary<string, string>() { { "2NT", "High
 MOTOR["threeSuitMajor1C"][1] = new Dictionary<string, string>() { { "3D", "4414" }, { "3H", "4405" }, { "3S", "4504" }, { "3NT", "5404" } };
 
 List<string> deck;
+
+Random random = new Random();
+//List<int> used = new List<int>();
+string[] north = new string[13];
+string[] south = new string[13];
+string[] east = new string[13];
+string[] west = new string[13];
+
+while (HCP(north) < 15 || HCP(south) < 9)
+{
+    deck = new List<string>(cards);
+
+    for (int i = 0; i < 13; i++)
+    {
+        int r = random.Next(0, deck.Count - 1);
+        north[i] = deck[r];
+        deck.RemoveAt(r);
+
+        r = random.Next(deck.Count - 1);
+        south[i] = deck[r];
+        deck.RemoveAt(r);
+
+        r = random.Next(deck.Count - 1);
+        east[i] = deck[r];
+        deck.RemoveAt(r);
+
+        r = random.Next(deck.Count - 1);
+        west[i] = deck[r];
+        deck.RemoveAt(r);
+    }
+}
+
+Hand N = new Hand(north);
+Hand S = new Hand(south);
+Hand E = new Hand(east);
+Hand W = new Hand(west);
+
+char[] positions = new char[] { 'N', 'E', 'S', 'W' };
+int bidPosOffset = 0;
+int bid = -1;
+int passes = 0;
+Dictionary<char, List<string>> bids = new Dictionary<char, List<string>>();
+bids.Add('N', new List<string>());
+bids.Add('E', new List<string>());
+bids.Add('S', new List<string>());
+bids.Add('W', new List<string>());
+
+switch (random.Next(0, 3))
+{
+    case 0:
+        bidPosOffset = 0;
+        break;
+    case 1:
+        bidPosOffset = 1;
+        break;
+    case 2:
+        bidPosOffset = 2;
+        break;
+    case 3:
+        bidPosOffset = 3;
+        break;
+}
+
+while(passes < 3)
+{
+    switch(positions[bidPosOffset % 4])
+    {
+        case 'N':
+            bids['N'].Add(bidSeq[Array.IndexOf(bidSeq, bids['S'].Last()) + 1]);
+
+            break;
+        case 'S':
+            string bidInput = Console.ReadLine();
+
+            if(bidInput == "/" || bidInput.ToLower() == "pass")
+            {
+                passes++;
+            }
+            else
+            {
+                bids['S'].Add(bidInput);
+            }
+
+            break;
+        case 'E':
+        case 'W':
+            passes++;
+            break;
+    }
+
+    bidPosOffset++;
+}
+
+
+
+string[] biddingSheetFile = File.ReadAllLines(@"C:\Users\John\source\repos\nzrdl9515\MOTOR\MOTOR\bin\Debug\net6.0\bidding_sheet.txt");
+
+string[] biddingSheet = new string[25];
+
+for(int i = 0; i < 25; i++)
+{
+    biddingSheet[i] = biddingSheetFile[i];
+}
+
+foreach(string line in biddingSheet)
+{
+    Console.WriteLine(line);
+}
+
+for(int i = 0; i < bidPos.Length; i++)
+{
+    Console.SetCursorPosition(bidPos[i][0], bidPos[i][1]);
+    Console.Write(i);
+}
+
+S.Print();
+
+Console.ReadKey();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 string input = Console.ReadLine();
@@ -127,12 +288,12 @@ for(int i = 0; i < bids.Length;)
     }
 }
 
-foreach(string descriptor in descriptors)
+/*foreach(string descriptor in descriptors)
 {
     Console.WriteLine(descriptor);
 }
 
-Console.WriteLine();
+Console.WriteLine();*/
 
 // Now to interpret the descriptors
 // They can be grouped:
@@ -519,44 +680,7 @@ foreach (int length in hand.Values)
 Console.ReadKey();
 
 
-Random random = new Random();
-//List<int> used = new List<int>();
-string[] north = new string[13];
-string[] south = new string[13];
-string[] east = new string[13];
-string[] west = new string[13];
 
-while (HCP(north) < 15 || HCP(south) < 9) {
-    deck = new List<string>(cards);
-
-    for (int i = 0; i < 13; i++)
-    {
-        int r = random.Next(0, deck.Count - 1);
-        north[i] = deck[r];
-        deck.RemoveAt(r);
-        
-        r = random.Next(deck.Count - 1);
-        south[i] = deck[r];
-        deck.RemoveAt(r);
-
-        r = random.Next(deck.Count - 1);
-        east[i] = deck[r];
-        deck.RemoveAt(r);
-
-        r = random.Next(deck.Count - 1);
-        west[i] = deck[r];
-        deck.RemoveAt(r);
-    }
-}
-
-Hand N = new Hand(north);
-Hand S = new Hand(south);
-Hand E = new Hand(east);
-Hand W = new Hand(west);
-
-N.Print();
-
-Console.WriteLine("\n" + N.GetHandType());
 
 
 
@@ -658,9 +782,9 @@ public class Hand
 
     public void Print()
     {
+        Console.Write("S: ");
         if (S.Count > 0)
         {
-            Console.Write("S: ");
             for (int i = 0; i < S.Count - 1; i++)
             {
                 Console.Write(S[i][0] + ", ");
@@ -668,9 +792,9 @@ public class Hand
             Console.WriteLine(S.Last()[0]);
         }
 
+        Console.Write("H: ");
         if (H.Count > 0)
         {
-            Console.Write("H: ");
             for (int i = 0; i < H.Count - 1; i++)
             {
                 Console.Write(H[i][0] + ", ");
