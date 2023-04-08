@@ -76,6 +76,20 @@ MOTOR["threeSuitMajor1C"][1] = new Dictionary<string, string>() { { "3D", "4414"
 
 List<string> deck;
 
+string[] biddingSheetFile = File.ReadAllLines("bidding_sheet.txt");
+
+string[] biddingSheet = new string[25];
+
+for (int i = 0; i < 25; i++)
+{
+    biddingSheet[i] = biddingSheetFile[i];
+}
+
+foreach (string line in biddingSheet)
+{
+    Console.WriteLine(line);
+}
+
 Random random = new Random();
 //List<int> used = new List<int>();
 string[] north = new string[13];
@@ -112,6 +126,8 @@ Hand S = new Hand(south);
 Hand E = new Hand(east);
 Hand W = new Hand(west);
 
+S.Print();
+
 char[] positions = new char[] { 'N', 'E', 'S', 'W' };
 int bidPosOffset = 0;
 int bid = -1;
@@ -138,12 +154,21 @@ switch (random.Next(0, 3))
         break;
 }
 
-while(passes < 3)
+Console.OutputEncoding = System.Text.Encoding.UTF8;
+
+while (passes < 3)
 {
     switch(positions[bidPosOffset % 4])
     {
         case 'N':
+
+            if(bids['S'].Count == 0 || bids['S'].Last() == "/")
+            {
+                bids['N'].Add("1C");
+            }
+
             bids['N'].Add(bidSeq[Array.IndexOf(bidSeq, bids['S'].Last()) + 1]);
+            passes = 0;
 
             break;
         case 'S':
@@ -152,45 +177,69 @@ while(passes < 3)
             if(bidInput == "/" || bidInput.ToLower() == "pass")
             {
                 passes++;
+                bids['S'].Add("/");
             }
             else
             {
                 bids['S'].Add(bidInput);
+                passes = 0;
             }
 
             break;
         case 'E':
+            if (bids['N'].Count + bids['S'].Count + bids['W'].Count + bids['W'].Count > 0)
+            {
+                passes++;
+            }
+            bids['E'].Add("/");
+            break;
         case 'W':
-            passes++;
+            if (bids['N'].Count + bids['S'].Count + bids['W'].Count + bids['W'].Count > 0)
+            {
+                passes++;
+            }
+            bids['W'].Add("/");
             break;
     }
+
+    printBid(bidPos[bidPosOffset], bids[positions[bidPosOffset % 4]].Last());
 
     bidPosOffset++;
 }
 
-
-
-string[] biddingSheetFile = File.ReadAllLines(@"C:\Users\John\source\repos\nzrdl9515\MOTOR\MOTOR\bin\Debug\net6.0\bidding_sheet.txt");
-
-string[] biddingSheet = new string[25];
-
-for(int i = 0; i < 25; i++)
+void printBid(int[] coord, string bid)
 {
-    biddingSheet[i] = biddingSheetFile[i];
+    switch (bid)
+    {
+        case "/":
+            Console.SetCursorPosition(coord[0], coord[1] + 1);
+            Console.Write("╱");
+            Console.SetCursorPosition(coord[0] + 1, coord[1]);
+            Console.Write("╱");
+            Console.SetCursorPosition(coord[0] + 2, coord[1] - 1);
+            Console.Write("╱");
+
+            break;
+        case "X":
+
+            break;
+        case "XX":
+
+            break;
+        default:
+            Console.SetCursorPosition(coord[0], coord[1]);
+            Console.Write(bid);
+            break;
+    }
 }
 
-foreach(string line in biddingSheet)
-{
-    Console.WriteLine(line);
-}
 
-for(int i = 0; i < bidPos.Length; i++)
+
+/*for(int i = 0; i < bidPos.Length; i++)
 {
     Console.SetCursorPosition(bidPos[i][0], bidPos[i][1]);
     Console.Write(i);
-}
-
-S.Print();
+}*/
 
 Console.ReadKey();
 
@@ -208,16 +257,18 @@ Console.ReadKey();
 
 
 
-
-
-string input = Console.ReadLine();
-string[] bids = input.Split(',');
+//string[] bids = input.Split(',');
 string topLayer = "relay1C";
 int subLayer = 0;
 List<string> descriptors = new List<string>();
 
-for(int i = 0; i < bids.Length;)
+for(int i = 0; i < bids['S'].Count;)
 {
+    if(bids['S'][i] == "/")
+    {
+        i++;
+        continue;
+    }
     // check if bid is above (run on if there's a +) or below (input error) the sequence of bids in the chosen layer.
     int lowBid = Array.IndexOf(bidSeq, MOTOR[topLayer][subLayer].First().Key);
     string highBidString = MOTOR[topLayer][subLayer].Last().Key;
@@ -228,7 +279,7 @@ for(int i = 0; i < bids.Length;)
         plus = true;
     }
     int highBid = Array.IndexOf(bidSeq, highBidString);
-    int bidIndex = Array.IndexOf(bidSeq, bids[i]);
+    int bidIndex = Array.IndexOf(bidSeq, bids['S'][i]);
 
     if (bidIndex < lowBid || (bidIndex > highBid && !plus))
     {
@@ -260,7 +311,7 @@ for(int i = 0; i < bids.Length;)
     }
     else
     {
-        string command = MOTOR[topLayer][subLayer][bids[i]];
+        string command = MOTOR[topLayer][subLayer][bids['S'][i]];
         int startIndex = command.IndexOf('['), endIndex = command.IndexOf(']');
 
         if (startIndex != -1)
