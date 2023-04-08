@@ -138,7 +138,7 @@ bids.Add('E', new List<string>());
 bids.Add('S', new List<string>());
 bids.Add('W', new List<string>());
 
-switch (random.Next(0, 3))
+/*switch (random.Next(0, 3))
 {
     case 0:
         bidPosOffset = 0;
@@ -152,7 +152,7 @@ switch (random.Next(0, 3))
     case 3:
         bidPosOffset = 3;
         break;
-}
+}*/
 
 Console.OutputEncoding = System.Text.Encoding.UTF8;
 
@@ -162,17 +162,37 @@ while (passes < 3)
     {
         case 'N':
 
-            if(bids['S'].Count == 0 || bids['S'].Last() == "/")
+            if (bids['S'].Count == 0 || bids['S'].Last() == "/")
             {
                 bids['N'].Add("1C");
             }
-
-            bids['N'].Add(bidSeq[Array.IndexOf(bidSeq, bids['S'].Last()) + 1]);
-            passes = 0;
+            else
+            {
+                bids['N'].Add(bidSeq[Array.IndexOf(bidSeq, bids['S'].Last()) + 1]);
+                passes = 0;
+            }
 
             break;
         case 'S':
-            string bidInput = Console.ReadLine();
+            Console.SetCursorPosition(bidPos[bidPosOffset][0], bidPos[bidPosOffset][1]);
+
+            bool validBid = false;
+            string bidInput = "";
+            while (!validBid)
+            {
+                bidInput = Console.ReadLine();
+
+                if(bidInput == "/" || Array.IndexOf(bidSeq, bidInput) > Array.IndexOf(bidSeq, bids['N'].Last()))
+                {
+                    validBid = true;
+                }
+                else
+                {
+                    Console.SetCursorPosition(bidPos[bidPosOffset][0], bidPos[bidPosOffset][1]);
+                    Console.Write("   ");
+                    Console.SetCursorPosition(bidPos[bidPosOffset][0], bidPos[bidPosOffset][1]);
+                }
+            }
 
             if(bidInput == "/" || bidInput.ToLower() == "pass")
             {
@@ -214,8 +234,8 @@ void printBid(int[] coord, string bid)
         case "/":
             Console.SetCursorPosition(coord[0], coord[1] + 1);
             Console.Write("╱");
-            Console.SetCursorPosition(coord[0] + 1, coord[1]);
-            Console.Write("╱");
+            Console.SetCursorPosition(coord[0], coord[1]);
+            Console.Write(" ╱");
             Console.SetCursorPosition(coord[0] + 2, coord[1] - 1);
             Console.Write("╱");
 
@@ -240,13 +260,6 @@ void printBid(int[] coord, string bid)
     Console.SetCursorPosition(bidPos[i][0], bidPos[i][1]);
     Console.Write(i);
 }*/
-
-Console.ReadKey();
-
-
-
-
-
 
 
 
