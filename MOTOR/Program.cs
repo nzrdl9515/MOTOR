@@ -1096,6 +1096,8 @@ internal class Program
 
                 if(longSuits == "64" || longSuits == "46")
                 {
+                    bids.Add("3H");
+
                     if(orderedHand == "6421")
                     {
                         bids.Add("3NT");
